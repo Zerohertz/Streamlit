@@ -1,0 +1,3 @@
+[submodule "quant"]
+	path = quant
+	url = https://github.com/Zerohertz/Streamlit-Quant
