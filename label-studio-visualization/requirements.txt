@@ -1,0 +1,2 @@
+streamlit
+label_studio_sdk

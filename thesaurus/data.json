@@ -1,0 +1,12 @@
+{
+    "Entity_1": ["Entity_1"],
+    "Entity_2": ["Entity_2"],
+    "Entity_3": ["Entity_3"],
+    "Entity_1a": ["Entity_1", "Entity_3"],
+    "Entity_1b": ["Entity_1"],
+    "Entity_1c": ["Entity_1"],
+    "Entity_2a": ["Entity_2"],
+    "Entity_2b": ["Entity_2"],
+    "Entity_3a": ["Entity_3"],
+    "Entity_3b": ["Entity_3"]
+}

@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: label-studio-visualization
+  labels:
+    app: label-studio-visualization
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: label-studio-visualization
+  template:
+    metadata:
+      labels:
+        app: label-studio-visualization
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: ${HOSTNAME}
+      containers:
+        - name: label-studio-visualization
+          image: label-studio-visualization:dev
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8501
+          resources:
+            requests:
+              memory: "16Gi"
+              cpu: "8000m"
+            limits:
+              memory: "32Gi"
+              cpu: "16000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: label-studio-visualization-service
+spec:
+  selector:
+    app: label-studio-visualization
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8501
+      protocol: TCP
+      targetPort: 8501
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: label-studio-visualization-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  rules:
+    - host: ${DDNS}
+      http:
+        paths:
+          - path: /label-studio-visualization(/|$)(.*)
+            backend:
+              serviceName: label-studio-visualization-service
+              servicePort: 8501
+            pathType: ImplementationSpecific

@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thesaurus
+  labels:
+    app: thesaurus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thesaurus
+  template:
+    metadata:
+      labels:
+        app: thesaurus
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: ${HOSTNAME}
+      containers:
+        - name: thesaurus
+          image: thesaurus:dev
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8501
+          resources:
+            requests:
+              memory: "16Gi"
+              cpu: "8000m"
+            limits:
+              memory: "32Gi"
+              cpu: "16000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thesaurus-service
+spec:
+  selector:
+    app: thesaurus
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8501
+      protocol: TCP
+      targetPort: 8501
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: thesaurus-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  rules:
+    - host: ${DDNS}
+      http:
+        paths:
+          - path: /thesaurus(/|$)(.*)
+            backend:
+              serviceName: thesaurus-service
+              servicePort: 8501
+            pathType: ImplementationSpecific
